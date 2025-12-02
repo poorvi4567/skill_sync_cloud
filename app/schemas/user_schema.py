@@ -9,3 +9,7 @@ class UserCreate(BaseModel):
     phone_number: Optional[str] = None
     experience_level: Optional[str] = None
     profile_summary: Optional[str] = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str

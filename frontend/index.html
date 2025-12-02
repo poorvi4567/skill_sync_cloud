@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SkillSync — Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-pattern">
+
+<header class="topbar">
+    <h1>🐧 SkillSync</h1>
+    <p class="tagline">Find the right mentor, build the right skills.</p>
+</header>
+
+<div class="container">
+    <div class="auth-card">
+
+        <img src="https://i.imgur.com/Y6bZf0v.png" class="mascot">
+
+        <h2>Welcome Back!</h2>
+        <p class="subtitle">Login to continue</p>
+
+        <form id="loginForm">
+            <input id="username" type="text" placeholder="Username" class="input-field">
+            <input id="password" type="password" placeholder="Password" class="input-field">
+
+            <button type="submit" class="btn primary-btn">Login</button>
+        </form>
+
+        <p class="switch-text">
+            New here? <a href="#" class="link">Create an account</a>
+        </p>
+    </div>
+</div>
+
+<script>
+// ------------------- LOGIN LOGIC -------------------
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    const res = await fetch("http://127.0.0.1:8000/users/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        alert(data.detail || "Login failed");
+        return;
+    }
+
+    // Save details
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("username", data.username);
+    localStorage.setItem("role", data.role);
+
+    window.location.href = "dashboard.html";
+});
+</script>
+
+</body>
+</html>

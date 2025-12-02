@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.db import get_supabase
-from app.schemas.user_schema import UserCreate
+from app.schemas.user_schema import UserCreate,UserLogin
 from app.utils.hashing import hash_password, verify_password
 from app.utils.auth import create_access_token
 
@@ -83,3 +83,34 @@ def get_user_by_username(username: str):
     )
 
     return res.data[0] if res.data else None
+
+#login code 
+@router.post("/login")
+def login_user(credentials: UserLogin, supabase = Depends(get_supabase)):
+    
+    res = (
+        supabase
+        .table("users")
+        .select("*")
+        .eq("username", credentials.username)
+        .execute()
+    )
+
+    if not res.data:
+        raise HTTPException(status_code=400, detail="Invalid username or password")
+
+    user = res.data[0]
+
+    # verify password
+    if not verify_password(credentials.password, user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Invalid username or password")
+
+    # generate JWT
+    token = create_access_token({"username": user["username"], "role": user["role"]})
+
+    return {
+        "message": "Login successful",
+        "token": token,
+        "username": user["username"],
+        "role": user["role"]
+    }
