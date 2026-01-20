@@ -23,6 +23,7 @@ class FirebaseChatDB:
     
     def _initialize_firebase(self):
         """Initialize Firebase Admin SDK"""
+        return
         try:
             # Check if already initialized
             if not firebase_admin._apps:
