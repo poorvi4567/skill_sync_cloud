@@ -1,25 +1,28 @@
-FROM python:3.10-slim
+# FastAPI Core
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
 
-# Set working directory
-WORKDIR /app
+# Database
+supabase==2.3.4
 
-# Install system dependencies (optional but safe)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Firebase
+firebase-admin==6.4.0
 
-# Copy dependency list
-COPY requirements.txt .
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# ML/NLP for matching
+sentence-transformers==2.3.1
+scikit-learn==1.4.0
+torch==2.2.0
+numpy==1.26.3
 
-# Copy backend source code
-COPY app/ ./app/
+# Resume parsing
+PyPDF2==3.0.1
+python-docx==1.1.0
 
-# Cloud Run uses port 8080
-ENV PORT=8080
-EXPOSE 8080
-
-# Start FastAPI with Uvicorn (WebSocket compatible)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# HTTP requests
+requests==2.31.0
