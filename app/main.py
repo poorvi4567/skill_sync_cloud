@@ -1,16 +1,16 @@
-# app/main.py (FIXED for WebSocket)
+# app/main.py (FIXED for WebSocket & Indentation)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat,resume_ats
+from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat, resume_ats
 from app.utils.firebase_chat_db import get_firebase_chat_db
-
+import os
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
     title="SkillSync Backend (Firebase + Supabase)",
     version="2.0.0",
     description="Complete mentorship platform with Resume ATS Scorer"
 )
-
 
 @app.on_event("startup")
 async def startup_event():
@@ -23,9 +23,7 @@ async def startup_event():
         import traceback
         traceback.print_exc()
 
-    
-
-# ---------------- CORS (IMPORTANT: Must be before routers) ----------------
+# ---------------- CORS ----------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,9 +43,6 @@ app.include_router(match.router, prefix="/match", tags=["Matching"])
 app.include_router(chat.router)  # WebSocket chat - NO PREFIX
 app.include_router(resume_ats.router)
 
-# ---------------- HEALTH CHECK ----------------
-
-
 # ---------------- DEBUG: List all routes ----------------
 @app.on_event("startup")
 async def show_routes():
@@ -60,9 +55,7 @@ async def show_routes():
             print(f"  {route.path}")
     print()
 
-import os
-from fastapi.staticfiles import StaticFiles
-
+# ---------------- FRONTEND MOUNTING ----------------
 # Resolve path: main.py is in /app/app/, frontend is in /app/frontend/
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
 root_dir = os.path.dirname(current_dir) 
