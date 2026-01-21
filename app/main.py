@@ -46,20 +46,7 @@ app.include_router(chat.router)  # WebSocket chat - NO PREFIX
 app.include_router(resume_ats.router)
 
 # ---------------- HEALTH CHECK ----------------
-@app.get("/")
-def root():
-    return {
-        "message": "SkillSync Backend is running 🚀",
-        "version": "2.0.0",
-        "features": [
-            "User Management",
-            "Skills & Matching",
-            "Mentorships",
-            "Opportunities",
-            "Real-time Chat",
-            "Resume ATS Scorer"
-        ]
-    }
+
 
 # ---------------- DEBUG: List all routes ----------------
 @app.on_event("startup")
@@ -72,3 +59,14 @@ async def show_routes():
         else:
             print(f"  {route.path}")
     print()
+
+import os
+from fastapi.staticfiles import StaticFiles
+
+# Resolve path: main.py is in /app/app/, frontend is in /app/frontend/
+current_dir = os.path.dirname(os.path.abspath(__file__)) 
+root_dir = os.path.dirname(current_dir) 
+frontend_path = os.path.join(root_dir, "frontend")
+
+# Mount the frontend to the root "/"
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
