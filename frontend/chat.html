@@ -572,7 +572,13 @@
     </div>
 
     <script>
-        const API_WS = "ws://127.0.0.1:8000/ws";
+        // Dynamic API detection
+        const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+        const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host;
+
+        const API = `${protocol}//${host}`;
+        const API_WS = `${ws_protocol}//${host}/ws`;
         const username = localStorage.getItem("username");
         const urlParams = new URLSearchParams(window.location.search);
         const chatWith = urlParams.get("chatWith");
