@@ -1,4 +1,10 @@
-const API = "http://127.0.0.1:8000";
+// Dynamic API detection
+const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const host = window.location.host;
+
+const API = `${protocol}//${host}`;
+const API_WS = `${ws_protocol}//${host}/ws`;
 
 const ENDPOINTS = {
     USERS: `${API}/users`,
