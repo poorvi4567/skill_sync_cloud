@@ -22,8 +22,10 @@ class FirebaseChatDB:
             FirebaseChatDB._initialized = True
     
     def _initialize_firebase(self):
-        """Initialize Firebase Admin SDK"""
-        return
+    """Temporary bypass for deployment"""
+    print("⚠️ Firebase functionality is disabled for this build.")
+    self.db = None
+    return
         try:
             # Check if already initialized
             if not firebase_admin._apps:
