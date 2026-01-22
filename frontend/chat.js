@@ -1,7 +1,3 @@
-console.log("chat.js loaded");
-// ---------------- CONFIG ----------------
-const SUPABASE_URL = "https://ygaprmfmbtkbgehpmcde.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlnYXBybWZtYnRrYmdlaHBtY2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NTQ0NzAsImV4cCI6MjA3ODQzMDQ3MH0.gg8RPKj-xee91qgEx1fFlw2LdvDgRd7gxbpMvvLeuSI"; // 👈 put full key here
 
 // Import Supabase client
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -46,10 +42,10 @@ async function sendMessage() {
     try {
         const { data, error } = await supabaseClient
             .from("messages")
-            .insert([{ 
-                from_user: username, 
-                to_user: chatWith, 
-                message 
+            .insert([{
+                from_user: username,
+                to_user: chatWith,
+                message
             }]);
 
         if (error) {
@@ -107,16 +103,16 @@ const channel = supabaseClient
     .channel("messages-channel")
     .on(
         "postgres_changes",
-        { 
-            event: "INSERT", 
-            schema: "public", 
-            table: "messages" 
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "messages"
         },
         (payload) => {
             const m = payload.new;
-            
+
             // Only show messages between current user and chat partner
-            if ((m.from_user === username && m.to_user === chatWith) || 
+            if ((m.from_user === username && m.to_user === chatWith) ||
                 (m.from_user === chatWith && m.to_user === username)) {
                 const isMe = m.from_user === username;
                 const text = isMe ? `You: ${m.message}` : `${chatWith}: ${m.message}`;
