@@ -1,7 +1,18 @@
-# app/main.py (FIXED for WebSocket & Indentation)
+import os
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat, resume_ats
+
+# Load environment variables (for local dev)
+load_dotenv()
+
+app = FastAPI(
+    title="SkillSync Backend",
+    version="2.0.0",
+    description="Complete mentorship platform"
+)
 
 
 # ---------------- CORS ----------------
