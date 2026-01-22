@@ -40,16 +40,6 @@ manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, username: str):
     print(f"🔌 WebSocket connection attempt from: {username}")
     
-    # Import Firebase here to avoid startup issues
-    try:
-        from app.utils.firebase_chat_db import get_firebase_chat_db
-        firebase_chat = get_firebase_chat_db()
-        print("✅ Firebase loaded successfully")
-    except Exception as e:
-        print(f"⚠️ Firebase error: {e}")
-        print("⚠️ Continuing without Firebase (messages won't persist)")
-        firebase_chat = None
-    
     await manager.connect(username, websocket)
     
     try:
@@ -58,7 +48,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             data = await websocket.receive_json()
             
             message_type = data.get("type")
-            print(f"📨 Received message type: {message_type} from {username}")
+            # print(f"📨 Received message type: {message_type} from {username}")
             
             # ===============================
             # 1. GET CHAT HISTORY
@@ -66,28 +56,13 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             if message_type == "get_history":
                 other_user = data.get("with_user")
                 
-                try:
-                    if firebase_chat:
-                        messages = firebase_chat.get_chat_history(username, other_user)
-                    else:
-                        messages = []
-                    
-                    # Send history back to requester
-                    await websocket.send_json({
-                        "type": "history",
-                        "with_user": other_user,
-                        "messages": messages,
-                        "count": len(messages)
-                    })
-                    
-                except Exception as e:
-                    print(f"Error fetching history: {e}")
-                    await websocket.send_json({
-                        "type": "history",
-                        "with_user": other_user,
-                        "messages": [],
-                        "count": 0
-                    })
+                # Firebase removed - return empty history
+                await websocket.send_json({
+                    "type": "history",
+                    "with_user": other_user,
+                    "messages": [],
+                    "count": 0
+                })
             
             # ===============================
             # 2. SEND MESSAGE
@@ -104,28 +79,12 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                     })
                     continue
                 
-                # Store message in Firebase (if available)
-                message_id = None
                 created_at = datetime.utcnow().isoformat()
-                
-                if firebase_chat:
-                    try:
-                        message_data = firebase_chat.create_message(
-                            from_user=from_user,
-                            to_user=to_user,
-                            message=text
-                        )
-                        message_id = message_data.get("id")
-                        created_at = message_data.get("created_at", created_at)
-                        print(f"✅ Message saved to Firebase: {message_id}")
-                    except Exception as e:
-                        print(f"⚠️ Error storing message in Firebase: {e}")
-                        # Continue anyway - message will still be delivered in real-time
                 
                 # Prepare response message
                 response = {
                     "type": "message",
-                    "id": message_id or f"temp_{datetime.utcnow().timestamp()}",
+                    "id": f"temp_{datetime.utcnow().timestamp()}",
                     "from_user": from_user,
                     "to_user": to_user,
                     "message": text,
@@ -177,40 +136,18 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             # 5. GET ALL CONVERSATIONS
             # ===============================
             elif message_type == "get_conversations":
-                try:
-                    if firebase_chat:
-                        conversations = firebase_chat.get_conversations(username)
-                    else:
-                        conversations = []
-                    
-                    # Add online status
-                    for conv in conversations:
-                        conv['is_online'] = manager.is_online(conv['user'])
-                    
-                    await websocket.send_json({
-                        "type": "conversations",
-                        "data": conversations
-                    })
-                    
-                except Exception as e:
-                    print(f"Error fetching conversations: {e}")
-                    await websocket.send_json({
-                        "type": "conversations",
-                        "data": []
-                    })
+                # Firebase removed - return empty conversations
+                await websocket.send_json({
+                    "type": "conversations",
+                    "data": []
+                })
             
             # ===============================
             # 6. MARK MESSAGES AS READ
             # ===============================
             elif message_type == "mark_read":
+                # No-op without database
                 other_user = data.get("from_user")
-                
-                if firebase_chat:
-                    try:
-                        firebase_chat.mark_messages_read(other_user, username)
-                    except Exception as e:
-                        print(f"Error marking read: {e}")
-                
                 await websocket.send_json({
                     "type": "marked_read",
                     "from_user": other_user
@@ -221,32 +158,11 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             # ===============================
             elif message_type == "delete_conversation":
                 other_user = data.get("with_user")
-                
-                if firebase_chat:
-                    try:
-                        success = firebase_chat.delete_conversation(username, other_user)
-                        
-                        if success:
-                            await websocket.send_json({
-                                "type": "conversation_deleted",
-                                "with_user": other_user
-                            })
-                        else:
-                            await websocket.send_json({
-                                "type": "error",
-                                "message": "Failed to delete conversation"
-                            })
-                    except Exception as e:
-                        print(f"Error deleting conversation: {e}")
-                        await websocket.send_json({
-                            "type": "error",
-                            "message": f"Failed to delete conversation: {str(e)}"
-                        })
-                else:
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": "Firebase not available"
-                    })
+                # No-op
+                await websocket.send_json({
+                    "type": "conversation_deleted",
+                    "with_user": other_user
+                })
             
             # ===============================
             # 8. PING/PONG (Keep-alive)
