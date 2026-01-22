@@ -5,6 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat, resume_ats
 
+import logging
+# Suppress the passlib/bcrypt version warning
+logging.getLogger('passlib').setLevel(logging.ERROR)
 # Load environment variables (for local dev)
 load_dotenv()
 
